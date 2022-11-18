@@ -1,0 +1,185 @@
+#include <iostream>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+// Вывод системы уравнений
+void sysout(double **a, double *y, int n)
+{
+  for (int i = 0; i < n; i++) 
+  {
+    for (int j = 0; j < n; j++) 
+    {
+      cout << a[i][j] << "*x" << j;
+      if (j < n - 1)
+        cout << " + ";
+    }
+    cout << " = " << y[i] << endl;
+  }
+  return;
+}
+
+double * gauss(double **a, double *y, int n) 
+{
+  double *x, max;
+  int k, index;
+  const double eps = 0.00001;  // точность
+  x = new double[n];
+  k = 0;
+  while (k < n) 
+  {
+    // поиск строки с макс a[i][k]
+    max = abs(a[k][k]);
+    index = k;
+    for (int i = k + 1; i < n; i++) 
+    {
+      if (abs(a[i][k]) > max)
+      {
+        max = abs(a[i][k]);
+        index = i;
+      }
+    }
+    // перестановка строк
+    if (max < eps) 
+    {
+      // нет ненулевых диагональныых элементов
+      cout << "Решение получить невозможно из-за нулевого столбца ";
+      cout << index << "Матрицы A" << endl;
+      return 0;
+    }
+    for (int j = 0; j < n; j++) 
+    {
+      double temp = a[k][j];
+      a[k][j] = a[index][j];
+      a[index][j] = temp;
+    }
+    double temp = y[k];
+    y[k] = y[index];
+    y[index] = temp;
+    // Нормализация уравнений
+    	for (int i = k; i < n; i++) 
+   	 	{
+	      double temp = a[i][k];
+	      if (abs(temp) < eps) continue; для нулевого коэф пропустить
+	      for (int j = 0; j < n; j++) 
+	        a[i][j] = a[i][j] / temp;
+	      y[i] = y[i] / temp;
+	      if (i == k)  continue; // уравнение не вычитать само из себя
+	      for (int j = 0; j < n; j++)
+	        a[i][j] = a[i][j] - a[k][j];
+	      y[i] = y[i] - y[k];
+	    }
+  	  k++;
+  }
+  // обратная подстановка
+  for (k = n - 1; k >= 0; k--)
+  {
+    x[k] = y[k];
+    for (int i = 0; i < k; i++)
+      y[i] = y[i] - a[i][k] * x[k];
+  }
+  sysout(a, y, n);
+  return x;
+}
+  
+  preob(double **A, double *B, double **C, double *D, int n)
+ 
+  {    for (int i=0;i<n;i++)
+
+    {
+
+     for (int j=0;j<n;j++)
+
+      {
+
+       C[i][j]=-A[i][j]/A[i][i];
+
+      }
+
+     C[i][i]=0;
+
+     D[i]=B[i]/A[i][i];
+
+    }
+	sysout(C, D, n);
+  }
+
+double * Zeidel( double **C, double *D, int n){    
+ float s=0, e=0.00001, a;
+ int fl, i;
+ double *X;
+ X = new double[n];
+ for (int i=0;i<n;i++)  
+    X[i]=0; 
+    
+ do {       
+   fl=1;       
+   for(i=0;i<n;i++){         
+      s=0;
+      for (int j=0;j<n;j++)  
+        s+=C[i][j]*X[j];  
+      a=fabs(X[i]-s-D[i]);  
+      X[i]=s+D[i];  
+      if (a>e) 
+        fl=0;
+    }
+  } while (fl==0);
+  
+  return X;
+}
+ 
+int main() 
+{
+  double **a, *y, *x;
+  double eps = 0.00001;
+  int n;
+  system("chcp 1251");
+  system("cls");
+  cout << "Введите количество уравнений: ";
+  cin >> n;
+  a = new double*[n];
+  y = new double[n];
+  for (int i = 0; i < n; i++) 
+  {
+    a[i] = new double[n];
+    for (int j = 0; j < n; j++) 
+    {
+      cout << "a[" << i << "][" << j << "]= ";
+      cin >> a[i][j];
+    }
+  }
+  for (int i = 0; i < n; i++) 
+  {
+    cout << "y[" << i << "]= ";
+    cin >> y[i];
+  }
+	double *D=new double[n];
+	double **C=new double *[n];    
+	for (int i=0;i<n;i++)
+    {
+     	C[i]=new double [n];
+    }
+    cout << "Введите номер метода, который будете использовать ( 1 - Гаусс, 2 - Зейдель";
+    int metod;
+    cin >> metod;
+    switch(metod)
+	{
+    	case 1:
+    		x = gauss(a, y, n);
+    		for (int i = 0; i < n; i++) 
+   			cout << "x[" << i << "]=" << x[i] << endl;
+  			//cin.get(); cin.get();
+  			break;
+  		case 2:
+  			preob(a,y,C,D,n);
+  			x = Zeidel(C, D, n);
+  			for (int i = 0; i < n; i++) 
+  			cout << "x[" << i << "]=" << x[i] << endl;
+ 			//vivod(x,n);
+ 			break;
+ 		default:
+ 			cout << "Введите другое значениè";
+ 			break;
+	}
+  return 0;
+}
